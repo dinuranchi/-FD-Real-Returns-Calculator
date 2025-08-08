@@ -1,0 +1,784 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FD Real Returns Calculator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab);
+            background-size: 400% 400%;
+            animation: gradientShift 8s ease infinite;
+            min-height: 100vh;
+            padding: 20px;
+            overflow-x: hidden;
+        }
+
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .floating-shapes {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .shape {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+            animation: float 15s infinite ease-in-out;
+        }
+
+        .shape:nth-child(1) {
+            width: 80px;
+            height: 80px;
+            top: 10%;
+            left: 10%;
+            animation-delay: 0s;
+            background: rgba(255, 107, 107, 0.3);
+        }
+
+        .shape:nth-child(2) {
+            width: 120px;
+            height: 120px;
+            top: 20%;
+            right: 10%;
+            animation-delay: 2s;
+            background: rgba(74, 144, 226, 0.3);
+        }
+
+        .shape:nth-child(3) {
+            width: 60px;
+            height: 60px;
+            bottom: 20%;
+            left: 20%;
+            animation-delay: 4s;
+            background: rgba(45, 206, 137, 0.3);
+        }
+
+        .shape:nth-child(4) {
+            width: 100px;
+            height: 100px;
+            bottom: 10%;
+            right: 20%;
+            animation-delay: 6s;
+            background: rgba(255, 193, 7, 0.3);
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            25% { transform: translateY(-20px) rotate(90deg); }
+            50% { transform: translateY(-40px) rotate(180deg); }
+            75% { transform: translateY(-20px) rotate(270deg); }
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 30px;
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            position: relative;
+            z-index: 10;
+            animation: slideUp 1s ease-out;
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            color: white;
+            padding: 50px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: repeating-linear-gradient(
+                45deg,
+                transparent,
+                transparent 10px,
+                rgba(255, 255, 255, 0.05) 10px,
+                rgba(255, 255, 255, 0.05) 20px
+            );
+            animation: patternMove 20s linear infinite;
+        }
+
+        @keyframes patternMove {
+            0% { transform: translateX(-50px) translateY(-50px); }
+            100% { transform: translateX(50px) translateY(50px); }
+        }
+
+        .header h1 {
+            font-size: 3rem;
+            margin-bottom: 15px;
+            font-weight: 800;
+            text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.3);
+            position: relative;
+            z-index: 2;
+            animation: titlePulse 3s ease-in-out infinite;
+        }
+
+        @keyframes titlePulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .header p {
+            font-size: 1.3rem;
+            opacity: 0.95;
+            position: relative;
+            z-index: 2;
+            animation: slideIn 1s ease-out 0.5s both;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(-30px); opacity: 0; }
+            to { transform: translateX(0); opacity: 0.95; }
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            padding: 50px;
+        }
+
+        .calculator-section {
+            background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+            padding: 40px;
+            border-radius: 25px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            position: relative;
+            overflow: hidden;
+            animation: sectionFadeIn 1s ease-out 0.3s both;
+        }
+
+        .calculator-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            animation: shimmer 3s ease-in-out infinite;
+        }
+
+        @keyframes shimmer {
+            0% { left: -100%; }
+            50% { left: 100%; }
+            100% { left: 100%; }
+        }
+
+        .results-section {
+            background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+            padding: 40px;
+            border-radius: 25px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            animation: sectionFadeIn 1s ease-out 0.6s both;
+        }
+
+        @keyframes sectionFadeIn {
+            from { transform: translateY(30px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        h2 {
+            color: #2c3e50;
+            margin-bottom: 30px;
+            font-size: 1.8rem;
+            font-weight: 700;
+            text-align: center;
+            position: relative;
+            animation: headingGlow 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes headingGlow {
+            from { text-shadow: 0 0 5px rgba(44, 62, 80, 0.3); }
+            to { text-shadow: 0 0 20px rgba(44, 62, 80, 0.6); }
+        }
+
+        h2::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 4px;
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            border-radius: 2px;
+            animation: underlineExpand 2s ease-in-out infinite;
+        }
+
+        @keyframes underlineExpand {
+            0%, 100% { width: 60px; }
+            50% { width: 100px; }
+        }
+
+        .input-group {
+            margin-bottom: 30px;
+            position: relative;
+            animation: inputSlide 0.5s ease-out;
+        }
+
+        @keyframes inputSlide {
+            from { transform: translateX(-20px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: 700;
+            color: #2c3e50;
+            font-size: 1.1rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 18px 20px;
+            border: 3px solid transparent;
+            border-radius: 15px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            background: linear-gradient(45deg, #f8f9fa, #e9ecef);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+            position: relative;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: #667eea;
+            background: linear-gradient(45deg, #ffffff, #f8f9fa);
+            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.2), 0 15px 35px rgba(0, 0, 0, 0.15);
+            transform: translateY(-3px) scale(1.02);
+        }
+
+        input:hover, select:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
+        }
+
+        .result-card {
+            background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+            padding: 30px;
+            border-radius: 20px;
+            margin-bottom: 25px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            border: 2px solid transparent;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+            animation: cardEntrance 0.6s ease-out backwards;
+        }
+
+        @keyframes cardEntrance {
+            from { transform: translateY(30px) scale(0.9); opacity: 0; }
+            to { transform: translateY(0) scale(1); opacity: 1; }
+        }
+
+        .result-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(45deg, #667eea, #764ba2, #f093fb);
+            animation: colorShift 3s ease-in-out infinite;
+        }
+
+        @keyframes colorShift {
+            0%, 100% { background: linear-gradient(45deg, #667eea, #764ba2); }
+            50% { background: linear-gradient(45deg, #764ba2, #f093fb); }
+        }
+
+        .result-card:hover {
+            transform: translateY(-8px) scale(1.03);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+            border-color: rgba(102, 126, 234, 0.3);
+        }
+
+        .result-label {
+            font-size: 1rem;
+            color: #6c757d;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        .result-value {
+            font-size: 2.2rem;
+            font-weight: 900;
+            color: #2c3e50;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+            animation: valueCounter 1s ease-out;
+        }
+
+        @keyframes valueCounter {
+            from { transform: scale(0.5); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        .positive {
+            color: #27ae60 !important;
+            background: linear-gradient(135deg, #d5f5e3, #a9dfbf) !important;
+            border-color: #27ae60 !important;
+            animation: positiveGlow 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes positiveGlow {
+            from { box-shadow: 0 10px 30px rgba(39, 174, 96, 0.2); }
+            to { box-shadow: 0 15px 40px rgba(39, 174, 96, 0.4); }
+        }
+
+        .negative {
+            color: #e74c3c !important;
+            background: linear-gradient(135deg, #fadbd8, #f1948a) !important;
+            border-color: #e74c3c !important;
+            animation: negativeShake 0.5s ease-in-out, negativeGlow 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes negativeShake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        @keyframes negativeGlow {
+            from { box-shadow: 0 10px 30px rgba(231, 76, 60, 0.2); }
+            to { box-shadow: 0 15px 40px rgba(231, 76, 60, 0.4); }
+        }
+
+        .warning {
+            color: #f39c12 !important;
+            background: linear-gradient(135deg, #fcf3cf, #f7dc6f) !important;
+            border-color: #f39c12 !important;
+            animation: warningPulse 1.5s ease-in-out infinite;
+        }
+
+        @keyframes warningPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+        }
+
+        .comparison-table {
+            background: linear-gradient(135deg, #ffffff, #f8f9fa);
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            margin-top: 30px;
+            border: 2px solid rgba(255, 255, 255, 0.5);
+            animation: tableSlideUp 1s ease-out 0.8s both;
+        }
+
+        @keyframes tableSlideUp {
+            from { transform: translateY(40px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 20px;
+            text-align: left;
+            font-weight: 700;
+            font-size: 1.1rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            position: relative;
+        }
+
+        th::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(45deg, #f093fb, #f5576c);
+            animation: headerGlow 2s ease-in-out infinite;
+        }
+
+        @keyframes headerGlow {
+            0%, 100% { opacity: 0.7; }
+            50% { opacity: 1; }
+        }
+
+        td {
+            padding: 18px 20px;
+            border-bottom: 2px solid #ecf0f1;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        tr:hover {
+            background: linear-gradient(45deg, #f8f9fa, #e9ecef);
+            transform: scale(1.01);
+        }
+
+        .formula-section {
+            background: linear-gradient(135deg, #ffeaa7, #fab1a0, #fd79a8);
+            padding: 30px;
+            border-radius: 20px;
+            margin: 30px 0;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            animation: formulaFloat 3s ease-in-out infinite;
+        }
+
+        @keyframes formulaFloat {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-5px); }
+        }
+
+        .formula {
+            font-family: 'Courier New', monospace;
+            font-size: 1.2rem;
+            font-weight: 800;
+            text-align: center;
+            color: #2d3436;
+            background: rgba(255, 255, 255, 0.7);
+            padding: 18px;
+            border-radius: 12px;
+            margin: 15px 0;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+            border: 2px solid rgba(255, 255, 255, 0.5);
+            animation: formulaPulse 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes formulaPulse {
+            from { background: rgba(255, 255, 255, 0.7); }
+            to { background: rgba(255, 255, 255, 0.9); }
+        }
+
+        .tips-section {
+            grid-column: 1 / -1;
+            background: linear-gradient(135deg, #a8edea 0%, #fed6e3 50%, #d299c2 100%);
+            padding: 40px;
+            border-radius: 25px;
+            margin-top: 30px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            animation: tipsEntrance 1s ease-out 1s both;
+        }
+
+        @keyframes tipsEntrance {
+            from { transform: translateY(50px) scale(0.95); opacity: 0; }
+            to { transform: translateY(0) scale(1); opacity: 1; }
+        }
+
+        .tips-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            margin-top: 30px;
+        }
+
+        .tip-card {
+            background: linear-gradient(135deg, #ffffff, #f8f9fa);
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            border: 2px solid rgba(255, 255, 255, 0.5);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+            animation: tipCardSlide 0.6s ease-out backwards;
+        }
+
+        @keyframes tipCardSlide {
+            from { transform: translateX(-30px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        .tip-card:nth-child(1) { animation-delay: 0.2s; }
+        .tip-card:nth-child(2) { animation-delay: 0.4s; }
+        .tip-card:nth-child(3) { animation-delay: 0.6s; }
+        .tip-card:nth-child(4) { animation-delay: 0.8s; }
+
+        .tip-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .tip-card:hover::before {
+            left: 100%;
+        }
+
+        .tip-card:hover {
+            transform: translateY(-10px) scale(1.05);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+            border-color: rgba(102, 126, 234, 0.4);
+        }
+
+        .tip-card h4 {
+            color: #2c3e50;
+            margin-bottom: 12px;
+            font-size: 1.2rem;
+            font-weight: 700;
+        }
+
+        .tip-card p {
+            color: #5a6c7d;
+            line-height: 1.6;
+            font-weight: 500;
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+                gap: 30px;
+                padding: 30px;
+            }
+            
+            .header h1 {
+                font-size: 2.2rem;
+            }
+            
+            .header p {
+                font-size: 1.1rem;
+            }
+
+            .result-value {
+                font-size: 1.8rem;
+            }
+        }
+
+        .celebrate {
+            animation: celebrate 0.8s ease-in-out;
+        }
+
+        @keyframes celebrate {
+            0%, 100% { transform: scale(1) rotate(0deg); }
+            25% { transform: scale(1.1) rotate(-5deg); }
+            50% { transform: scale(1.2) rotate(5deg); }
+            75% { transform: scale(1.1) rotate(-3deg); }
+        }
+
+        /* Loading animation for results */
+        .loading {
+            position: relative;
+        }
+
+        .loading::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 20px;
+            height: 20px;
+            margin: -10px 0 0 -10px;
+            border: 2px solid #667eea;
+            border-radius: 50%;
+            border-top-color: transparent;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="floating-shapes">
+        <div class="shape"></div>
+        <div class="shape"></div>
+        <div class="shape"></div>
+        <div class="shape"></div>
+    </div>
+
+    <div class="container">
+        <div class="header">
+            <h1>💰✨ FD Real Returns Calculator ✨💰</h1>
+            <p>🚀 Discover how inflation and taxes impact your Fixed Deposit returns with stunning visuals! 🎨</p>
+        </div>
+
+        <div class="main-content">
+            <div class="calculator-section">
+                <h2>📊 Input Parameters</h2>
+                
+                <div class="input-group">
+                    <label for="fdRate">💎 FD Interest Rate (%)</label>
+                    <input type="number" id="fdRate" value="7" step="0.1" min="0" max="20">
+                </div>
+
+                <div class="input-group">
+                    <label for="taxSlab">🏛️ Your Tax Slab (%)</label>
+                    <select id="taxSlab">
+                        <option value="0">0% (No Tax) 🎉</option>
+                        <option value="5">5% (New Regime ₹3-6L) 😊</option>
+                        <option value="10">10% (Old Regime ₹2.5-5L / New ₹6-9L) 🤔</option>
+                        <option value="15">15% (New Regime ₹9-12L) 😐</option>
+                        <option value="20" selected>20% (Old Regime ₹5-10L / New ₹12-15L) 😓</option>
+                        <option value="30">30% (Above ₹10L Old / ₹15L New) 😰</option>
+                    </select>
+                </div>
+
+                <div class="input-group">
+                    <label for="inflationRate">📈 Current Inflation Rate (%)</label>
+                    <input type="number" id="inflationRate" value="6" step="0.1" min="0" max="15">
+                </div>
+
+                <div class="input-group">
+                    <label for="principal">💵 Investment Amount (₹)</label>
+                    <input type="number" id="principal" value="100000" step="1000" min="1000">
+                </div>
+
+                <div class="input-group">
+                    <label for="tenure">⏰ Investment Tenure (Years)</label>
+                    <input type="number" id="tenure" value="5" step="1" min="1" max="30">
+                </div>
+
+                <div class="formula-section">
+                    <h3 style="text-align: center; margin-bottom: 20px; color: #2d3436; font-size: 1.4rem;">🧮 Magic Formula ✨</h3>
+                    <div class="formula">Post-Tax Return = FD Rate × (1 - Tax Rate)</div>
+                    <div class="formula">Real Return = Post-Tax Return - Inflation Rate</div>
+                </div>
+            </div>
+
+            <div class="results-section">
+                <h2>🎯 Your Amazing Results</h2>
+                
+                <div id="resultsContainer">
+                    <div class="result-card">
+                        <div class="result-label">🎊 Gross Annual Return</div>
+                        <div class="result-value" id="grossReturn">7.00%</div>
+                    </div>
+
+                    <div class="result-card">
+                        <div class="result-label">💸 Tax Amount (Annual)</div>
+                        <div class="result-value" id="taxAmount">₹1,400</div>
+                    </div>
+
+                    <div class="result-card">
+                        <div class="result-label">💰 Post-Tax Return</div>
+                        <div class="result-value" id="postTaxReturn">5.60%</div>
+                    </div>
+
+                    <div class="result-card" id="realReturnCard">
+                        <div class="result-label">🔥 Real Return (After Inflation)</div>
+                        <div class="result-value" id="realReturn">-0.40%</div>
+                    </div>
+
+                    <div class="result-card">
+                        <div class="result-label">🎁 Maturity Amount</div>
+                        <div class="result-value" id="maturityAmount">₹1,40,255</div>
+                    </div>
+
+                    <div class="result-card">
+                        <div class="result-label">💎 Real Value (Today's Power)</div>
+                        <div class="result-value" id="realValue">₹1,04,774</div>
+                    </div>
+                </div>
+
+                <div class="comparison-table">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>🏛️ Tax Slab</th>
+                                <th>💰 Post-Tax Return</th>
+                                <th>🔥 Real Return</th>
+                                <th>📊 Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="comparisonTableBody">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="tips-section">
+                <h2>💡 Smart Investment Tips & Alternatives 🚀</h2>
+                <div class="tips-grid">
+                    <div class="tip-card">
+                        <h4>🛡️ Tax-Free Superstars</h4>
+                        <p>🌟 Consider PPF (7.1% tax-free), NSC, or ELSS mutual funds for better tax-adjusted returns that actually beat inflation!</p>
+                    </div>
+                    <div class="tip-card">
+                        <h4>🎨 Diversification Magic</h4>
+                        <p>🎯 Don't put all eggs in one basket! Mix FDs with equity mutual funds, gold, and real estate for ultimate inflation protection.</p>
+                    </div>
+                    <div class="tip-card">
+                        <h4>⏰ Laddering Strategy</h4>
+                        <p>🎪 Split FDs across different tenures to benefit from changing interest rates - it's like having multiple shots at success!</p>
+                    </div>
+                    <div class="tip-card">
+                        <h4>🚨 Emergency Fund First</h4>
+                        <p>🏠 Keep 6-12 months expenses in FDs/liquid funds for emergencies, then invest the rest for growth - safety first, growth second!</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer with author info -->
+        <div style="background: linear-gradient(135deg, #2c3e50, #34495e); color: white; padding: 25px 50px; text-align: center; border-top: 3px solid #3498db;">
+            <p style="margin: 0; font-size: 1rem; opacity: 0.9;">
+                💫 <strong>Designed with ❤️ by Dinesh Kumar</strong> 💫<br>
+                <span style="font-size: 0.9rem; opacity: 0.8;">🛰️ ISRO Satellite Center, Bangalore | Making Finance Simple & Visual 🎨</span>
+            </p>
+        </div>
+    </div>
+
+    <script>
+        let animationTimeouts = [];
+
+        function calculateReturns() {
+            // Clear previous animations
+            animationTimeouts.forEach(timeout => clearTimeout(timeout));
+            animationTimeouts = [];
+
+            const fdRate = parseFloat(document.getElementById('fdRate').value) || 0;
+            const taxSlab = parseFloat(document.getElementById('taxSlab').value) || 0;
+            const inflationRate = parseFloat(document.getElementById('inflationRate').value) || 0;
+            const principal = parseFloat(document.getElementById('principal').value) || 0;
+            const tenure = parseInt(document.getElementById('tenure').value) || 1;
+
+            // Add loading
